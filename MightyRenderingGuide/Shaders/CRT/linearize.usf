@@ -1,0 +1,15 @@
+﻿#include "/Engine/Private/ScreenPass.ush"
+#include "/Engine/Private/Common.ush"
+
+SCREEN_PASS_TEXTURE_VIEWPORT(Input)
+SCREEN_PASS_TEXTURE_VIEWPORT(Output)
+
+Texture2D Source;
+SamplerState SourceSampler;
+float GAMMA_INPUT;
+
+float4 MainPS(float4 SvPosition : SV_POSITION) : SV_Target0
+{
+	const float2 UV = SvPosition.xy * Output_ExtentInverse;
+	return pow(float4(Texture2DSample(Source, SourceSampler, UV)), GAMMA_INPUT.xxxx);
+}

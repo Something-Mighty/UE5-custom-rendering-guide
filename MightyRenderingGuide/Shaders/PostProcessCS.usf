@@ -1,0 +1,37 @@
+#include "/Engine/Private/Common.ush"
+#include "/Engine/Public/Platform.ush"
+#include "/Engine/Private/ColorSpace.ush"
+
+int2 SceneTextureSize;
+RWTexture2D<float4> SceneTexture;
+
+Texture2D<float4> GBuffer;
+float2 GBufferExtent;
+float2 GBufferInverseExtent;
+SamplerState SourceSampler;
+
+float4 EdgeColor;
+float EdgeStrength;
+
+[numthreads(8, 8, 1)]
+void MainCS(uint3 DispatchThreadId : SV_DispatchThreadID)
+{
+	if (any(DispatchThreadId.xy >= SceneTextureSize))
+	{
+		return;
+	}
+
+	const float2 GBufferUV = float2(DispatchThreadId.xy) / GBufferExtent;
+
+	const float4 Up = Texture2DSample(GBuffer, SourceSampler, GBufferUV + float2(0.0, 1.0) * GBufferInverseExtent);
+	const float4 Down = Texture2DSample(GBuffer, SourceSampler, GBufferUV - float2(0.0, 1.0) * GBufferInverseExtent);
+	const float4 Left = Texture2DSample(GBuffer, SourceSampler, GBufferUV - float2(1.0, 0.0) * GBufferInverseExtent);
+	const float4 Right = Texture2DSample(GBuffer, SourceSampler, GBufferUV + float2(1.0, 0.0) * GBufferInverseExtent);
+
+	const float HorizontalEdge = abs(Right.a - Left.a);
+	const float VerticalEdge = abs(Up.a - Down.a);
+
+	const float Edge = saturate((HorizontalEdge + VerticalEdge) * EdgeStrength);
+
+	SceneTexture[DispatchThreadId.xy] = lerp(SceneTexture[DispatchThreadId.xy], EdgeColor, Edge);
+}

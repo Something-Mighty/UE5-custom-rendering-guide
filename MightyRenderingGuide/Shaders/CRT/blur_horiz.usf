@@ -1,0 +1,28 @@
+﻿#include "/Engine/Private/ScreenPass.ush"
+#include "/Engine/Private/Common.ush"
+
+#include "blur_params.ush"
+
+SCREEN_PASS_TEXTURE_VIEWPORT(Input)
+SCREEN_PASS_TEXTURE_VIEWPORT(Output)
+
+#define kernel(x) exp(-GLOW_FALLOFF * (x) * (x))
+
+Texture2D Source;
+SamplerState SourceSampler;
+
+float4 MainPS(float4 SvPosition : SV_POSITION) : SV_Target0
+{
+	const float2 UV = SvPosition.xy * Output_ExtentInverse;
+
+	float3 col = 0.0;
+
+	float k_total = 0.0;
+	for (int i = -TAPS; i <= TAPS; i++)
+	{
+		float k = kernel(i);
+		k_total += k;
+		col += k * Texture2DSample(Source, SourceSampler, UV + float2(float(i) * Input_ExtentInverse.x, 0.0)).rgb;
+	}
+	return float4(col / k_total, 1.0);
+}
