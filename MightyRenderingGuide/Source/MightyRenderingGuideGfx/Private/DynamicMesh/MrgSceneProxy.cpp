@@ -6,8 +6,8 @@
 void FMrgIndexBuffer::InitRHI(FRHICommandListBase& RHICmdList)
 {
 	FRHIResourceCreateInfo CreateInfo(TEXT("FMrgIndexBuffer"));
-	const uint32 DataSize = Indices.Num() * sizeof(int32);
-	SetRHI(RHICmdList.CreateIndexBuffer(sizeof(int32), DataSize, BUF_Static, CreateInfo));
+	const uint32 DataSize = Indices.Num() * sizeof(int16);
+	SetRHI(RHICmdList.CreateIndexBuffer(sizeof(int16), DataSize, BUF_Static, CreateInfo));
 	void* BufferMemory = RHICmdList.LockBuffer(GetRHI(), 0, DataSize, RLM_WriteOnly);
 	FMemory::Memcpy(BufferMemory, Indices.GetData(), DataSize);
 	RHICmdList.UnlockBuffer(GetRHI());
@@ -245,13 +245,9 @@ void FMrgSceneProxy::BuildCenterMesh()
 		// Compute the angle for this vertex
 		const float Angle = 2.0f * PI * i / VertexCount;
 
-		// Compute wave displacement
-		// const float Displacement = (WaveAmplitude * 1.5f) + WaveAmplitude * FMath::Sin(WaveFrequency * Angle);
-		const float Displacement = 0.0f;
-
 		// Compute the position of the vertex on the wave border
-		const float X = (Radius + Displacement) * FMath::Cos(Angle);
-		const float Y = (Radius + Displacement) * FMath::Sin(Angle);
+		const float X = Radius * FMath::Cos(Angle);
+		const float Y = Radius * FMath::Sin(Angle);
 
 		// Create and add the vertex
 		FDynamicMeshVertex Vert(FVector3f(X, Y, 0.0f), FVector2f((X / Radius) * 1.5f, (Y / Radius) * 1.5f),

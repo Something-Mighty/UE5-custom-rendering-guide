@@ -14,8 +14,7 @@ public:
 
 	virtual void InitRHI(FRHICommandListBase& RHICmdList) override;
 
-	// private:
-	TArray<int32> Indices;
+	TArray<int16> Indices;
 };
 
 class FMrgSceneProxy : public FPrimitiveSceneProxy
@@ -49,5 +48,5 @@ private:
 
 	FMrgVertexFactory VertexFactory;
 	TArray<FDynamicMeshVertex> Vertices;
-	TArray<int32> Indices;
+	TArray<int16> Indices;
 };
